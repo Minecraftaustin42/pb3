@@ -1,127 +1,58 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Playsculpt</title>
+    <title>Playsculpt Login</title>
 </head>
-<body style="font-family:Arial;background:white;text-align:center;">
+<body style="font-family:Arial;background:white;text-align:center;color:#333;">
 
     <h1 style="color:blue;">Playsculpt</h1>
+    <p style="color:purple;">Create, share, and play simple 3D CSS games.</p>
 
-    <p style="color:purple;">
-        Create an account for free to get started!
-    </p>
+    <!-- Signup section -->
+    <div style="border:3px dashed blue;padding:20px;background:#f5f5f5;max-width:330px;margin:10px auto;">
+        <h2 style="color:purple;">Sign Up</h2>
+        <input id="signupUsername" placeholder="Username" maxlength="20" style="padding:8px;margin:5px;width:85%;"><br>
+        <input id="signupPassword" type="password" placeholder="Password" style="padding:8px;margin:5px;width:85%;"><br>
+        <button onclick="signup()" style="background:blue;color:white;border:none;padding:9px;margin:5px;">Sign Up</button>
+    </div>
 
-    <form id="signupForm" style="
-        border:3px dashed blue;
-        padding:20px;
-        background:#f5f5f5;
-        max-width:300px;
-        margin:auto;
-    ">
-        <h3 style="color:blue;">Sign Up</h3>
+    <!-- Login section -->
+    <div style="border:3px solid purple;padding:20px;background:#f5f5f5;max-width:330px;margin:10px auto;">
+        <h2 style="color:blue;">Log In</h2>
+        <input id="loginUsername" placeholder="Username" maxlength="20" style="padding:8px;margin:5px;width:85%;"><br>
+        <input id="loginPassword" type="password" placeholder="Password" style="padding:8px;margin:5px;width:85%;"><br>
+        <button onclick="login()" style="background:purple;color:white;border:none;padding:9px;margin:5px;">Log In</button>
+    </div>
 
-        <input type="text" id="signupUsername" placeholder="Username" required>
-
-        <br><br>
-
-        <input type="password" id="signupPassword" placeholder="Password" required>
-
-        <br><br>
-
-        <button type="submit">
-            Sign Up
-        </button>
-    </form>
-
-    <br>
-
-    <form id="loginForm" style="
-        border:3px dashed purple;
-        padding:20px;
-        background:#f5f5f5;
-        max-width:300px;
-        margin:auto;
-    ">
-        <h3 style="color:purple;">Login</h3>
-
-        <input type="text" id="usernameBox" placeholder="Username" required>
-
-        <br><br>
-
-        <input type="password" id="passwordBox" placeholder="Password" required>
-
-        <br><br>
-
-        <button type="submit">
-            Login
-        </button>
-    </form>
+    <p id="message" style="color:gray;"></p>
 
 <script>
-document.getElementById("signupForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
+async function signup() {
+    const response = await fetch("/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            username: document.getElementById("signupUsername").value,
+            password: document.getElementById("signupPassword").value
+        })
+    });
+    const data = await response.json();
+    document.getElementById("message").innerText = data.success ? "Account created! Now log in." : data.message;
+}
 
-    const username = document.getElementById("signupUsername").value;
-    const password = document.getElementById("signupPassword").value;
-
-    try {
-        const response = await fetch("/signup", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                username,
-                password
-            })
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            alert("Account created!");
-
-            document.getElementById("signupUsername").value = "";
-            document.getElementById("signupPassword").value = "";
-        } else {
-            alert(data.message || "Signup failed");
-        }
-
-    } catch (err) {
-        alert("Server error");
-    }
-});
-
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const username = document.getElementById("usernameBox").value;
-    const password = document.getElementById("passwordBox").value;
-
-    try {
-        const response = await fetch("/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                username,
-                password
-            })
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            window.location.href = "/home.html";
-        } else {
-            alert(data.message || "Invalid login");
-        }
-
-    } catch (err) {
-        alert("Server error");
-    }
-});
+async function login() {
+    const response = await fetch("/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            username: document.getElementById("loginUsername").value,
+            password: document.getElementById("loginPassword").value
+        })
+    });
+    const data = await response.json();
+    if (data.success) window.location.href = "/home.html";
+    else document.getElementById("message").innerText = data.message;
+}
 </script>
 
 </body>

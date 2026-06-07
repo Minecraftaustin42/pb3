@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Playsculpt Games</title>
+</head>
+<body style="font-family:Arial;background:white;text-align:center;color:#333;">
+
+    <h1 style="color:blue;">Discover Games</h1>
+    <div><a href="/home.html" style="color:blue;">Home</a> <a href="/create-game.html" style="color:purple;">Create Game</a></div>
+    <div id="gamesList" style="max-width:750px;margin:15px auto;">Loading...</div>
+
+<script>
+async function loadGames() {
+    const response = await fetch("/api/games");
+    const data = await response.json();
+    if (!data.success) { window.location.href = "/auth.html"; return; }
+
+    let html = "";
+    if (data.games.length === 0) html = "<p>No games yet. Create the first one!</p>";
+    data.games.forEach(game => {
+        html += `<div style="border:2px solid blue;background:#f5f5f5;margin:10px;padding:12px;text-align:left;">
+            <h2 style="color:purple;margin:0;">${game.title}</h2>
+            <p><b>Creator:</b> ${game.creatorUsername} | <b>Genre:</b> ${game.genre} | <b>Visibility:</b> ${game.visibility}</p>
+            <p>${game.description || "No description."}</p>
+            <button onclick="location.href='/play.html?gameId=${game.gameId}'" style="background:blue;color:white;border:none;padding:8px;">Play Game</button>
+            <button onclick="location.href='/user/${game.creatorId}'" style="background:purple;color:white;border:none;padding:8px;">Creator Profile</button>
+            ${game.visibility === "private" ? `<a href="/edit-game.html?gameId=${game.gameId}" style="color:gray;margin-left:10px;">Edit Private Game</a>` : ""}
+        </div>`;
+    });
+    document.getElementById("gamesList").innerHTML = html;
+}
+
+loadGames();
+</script>
+
+</body>
+</html>

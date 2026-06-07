@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Playsculpt Group</title>
+</head>
+<body style="font-family:Arial;background:white;text-align:center;color:#333;">
+
+    <h1 style="color:blue;">Create Group</h1>
+    <a href="/groups.html" style="color:blue;">Back to Groups</a>
+    <p style="color:gray;">Cost: 100 SculptCoins</p>
+
+    <div style="border:2px solid purple;background:#f5f5f5;max-width:500px;margin:15px auto;padding:15px;">
+        <input id="name" maxlength="50" placeholder="Group name" style="padding:8px;margin:5px;width:90%;"><br>
+        <textarea id="description" maxlength="300" placeholder="Group description" style="padding:8px;margin:5px;width:90%;height:80px;"></textarea><br>
+        <button onclick="createGroup()" style="background:blue;color:white;border:none;padding:9px;margin:8px;">Create Group</button>
+        <p id="message" style="color:purple;"></p>
+    </div>
+
+<script>
+async function createGroup() {
+    const response = await fetch("/api/groups/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: document.getElementById("name").value, description: document.getElementById("description").value })
+    });
+    const data = await response.json();
+    if (data.success) window.location.href = "/group.html?groupId=" + data.groupId;
+    else document.getElementById("message").innerText = data.message;
+}
+</script>
+
+</body>
+</html>

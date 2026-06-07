@@ -1,118 +1,79 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Playsculpt</title>
+    <title>Playsculpt Home</title>
 </head>
-<body style="font-family:Arial;background:white;text-align:center;">
+<body style="font-family:Arial;background:white;text-align:center;color:#333;">
 
-    <h1 style="color:blue;">Playsculpt</h1>
+    <h1 style="color:blue;">Playsculpt Home</h1>
 
-    <div id="homeBox" style="
-        border:3px dashed purple;
-        padding:20px;
-        background:#f5f5f5;
-        max-width:400px;
-        margin:auto;
-    ">
-        Loading...
+    <!-- Navigation links -->
+    <div style="background:#eeeeee;padding:10px;margin:10px;">
+        <a href="/profile.html" style="color:purple;margin:5px;">Profile</a>
+        <a href="/avatar.html" style="color:purple;margin:5px;">Avatar</a>
+        <a href="/badges.html" style="color:purple;margin:5px;">Badges</a>
+        <a href="/games.html" style="color:purple;margin:5px;">Games</a>
+        <a href="/create-game.html" style="color:purple;margin:5px;">Create Game</a>
+        <a href="/groups.html" style="color:purple;margin:5px;">Groups</a>
+        <button onclick="claimDailyReward()" style="background:blue;color:white;border:none;padding:7px;margin:5px;">Daily Reward</button>
+        <button onclick="logout()" style="background:gray;color:white;border:none;padding:7px;margin:5px;">Logout</button>
     </div>
 
-    <br>
+    <div id="homeBox" style="border:2px solid blue;background:#f5f5f5;max-width:650px;margin:auto;padding:15px;">Loading...</div>
 
-    <a href="/badges.html" style="color:purple;">
-        View My Badges
-    </a>
-
-   
-
-    <br><br>
-
-    <button onclick="logout()" style="
-        background:blue;
-        color:white;
-        border:none;
-        padding:10px;
-    ">
-        Logout
-    </button>
+    <h2 style="color:purple;">Your Created Games</h2>
+    <div id="myGames" style="max-width:650px;margin:auto;">Loading games...</div>
 
 <script>
-const tipMessages = [
-    "You can earn Points by playing games!",
-    "You can earn SculptCoins by creating games!",
-    "You can view your badges and achievements in your profile!",
-    "Diamonds are rare! Use them for top-tier avatar items, perks, and more!",
-    "Invite friends to earn tons of points!",
-    "Check out the latest games in the Games section!",
-    "Customize your avatar with items from the Avatar Shop!",
-    "Points can be exchanged to SculptCoins with the Exchange feature!",
-    "You can create your own games with the Playsculpt Studio!",
-    "You can earn real-life rewards with SculptCoins!",
-    "Don't forget to check out community events!"
-];
-
-
+function avatarHtml(color) {
+    return `<div style="width:70px;height:95px;margin:10px auto;position:relative;">
+        <div style="width:36px;height:36px;background:${color};border:2px solid #333;border-radius:18px;margin:auto;"></div>
+        <div style="width:48px;height:45px;background:${color};border:2px solid #333;margin:auto;"></div>
+        <div style="display:flex;gap:8px;justify-content:center;"><div style="width:15px;height:25px;background:${color};border:2px solid #333;"></div><div style="width:15px;height:25px;background:${color};border:2px solid #333;"></div></div>
+    </div>`;
+}
 
 async function loadHome() {
-    try {
-        const response = await fetch("/me");
-        const data = await response.json();
+    const response = await fetch("/me");
+    const data = await response.json();
+    if (!data.success) { window.location.href = "/auth.html"; return; }
 
-        if (!data.success) {
-            window.location.href = "/auth.html";
-            return;
-        }
+    document.getElementById("homeBox").innerHTML = `
+        ${avatarHtml(data.avatar.color)}
+        <h2 style="color:purple;">Hello, ${data.username}</h2>
+        <p style="color:gray;">User ID #${data.userId}</p>
+        <p style="color:gray;">Member Since: ${new Date(data.joinDate).toLocaleDateString()}</p>
+        <p>🪙 SculptCoins: <b>${data.currencies.SculptCoins}</b></p>
+        <p>⭐ Points: <b>${data.currencies.Points}</b></p>
+        <p>💎 Diamonds: <b>${data.currencies.Diamonds}</b></p>
+        <p style="color:purple;">Tip: Create a public game so other players can earn Points and you can earn SculptCoins.</p>
+    `;
 
-        const joinDate = new Date(data.joinDate);
-
-const formattedDate =
-    joinDate.toLocaleDateString();
-
-        const randomTip =
-            tipMessages[Math.floor(Math.random() * tipMessages.length)];
-
-        document.getElementById("homeBox").innerHTML = `
-            <h2 style="color:purple;">
-                Hello, ${data.username}
-            </h2>
-
-            <p style="color:gray;">
-                User ID #${data.userId}
-            </p>
-
-            <p style="color:gray;">
-    Member Since: ${formattedDate}
-</p>
-
-            <p>
-                ${randomTip}
-            </p>
-
-            <hr>
-
-            <p>
-                🪙 SculptCoins: <b>${data.currencies.SculptCoins}</b>
-            </p>
-
-            <p>
-                ⭐ Points: <b>${data.currencies.Points}</b>
-            </p>
-
-            <p>
-                💎 Diamonds: <b>${data.currencies.Diamonds}</b>
-            </p>
-        `;
-    } catch (err) {
-        document.getElementById("homeBox").innerHTML =
-            "Failed to load account.";
+    const profileResponse = await fetch("/api/profile/" + data.userId);
+    const profileData = await profileResponse.json();
+    if (profileData.success) {
+        let html = "";
+        if (profileData.createdGames.length === 0) html = "<p>No games created yet.</p>";
+        profileData.createdGames.forEach(game => {
+            html += `<div style="border:1px solid blue;background:#f5f5f5;padding:8px;margin:6px;">
+                <b>${game.title}</b> (${game.genre}) - ${game.visibility}<br>
+                <a href="/play.html?gameId=${game.gameId}" style="color:blue;">Play</a>
+                <a href="/edit-game.html?gameId=${game.gameId}" style="color:purple;margin-left:10px;">Edit</a>
+            </div>`;
+        });
+        document.getElementById("myGames").innerHTML = html;
     }
 }
 
-async function logout() {
-    await fetch("/logout", {
-        method: "POST"
-    });
+async function claimDailyReward() {
+    const response = await fetch("/api/daily-reward", { method: "POST" });
+    const data = await response.json();
+    alert(data.message || "Daily reward checked.");
+    loadHome();
+}
 
+async function logout() {
+    await fetch("/logout", { method: "POST" });
     window.location.href = "/auth.html";
 }
 

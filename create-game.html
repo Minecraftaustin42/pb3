@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Playsculpt Game</title>
+</head>
+<body style="font-family:Arial;background:white;text-align:center;color:#333;">
+
+    <h1 style="color:blue;">Create Game</h1>
+    <a href="/home.html" style="color:blue;">Back Home</a>
+
+    <div style="border:2px solid purple;background:#f5f5f5;max-width:500px;margin:15px auto;padding:15px;">
+        <input id="title" maxlength="60" placeholder="Game title" style="padding:8px;margin:5px;width:90%;"><br>
+        <textarea id="description" maxlength="300" placeholder="Description" style="padding:8px;margin:5px;width:90%;height:80px;"></textarea><br>
+        <input id="genre" maxlength="30" placeholder="Genre" style="padding:8px;margin:5px;width:90%;"><br>
+        <select id="visibility" style="padding:8px;margin:5px;width:93%;">
+            <option value="public">Public</option>
+            <option value="private">Private</option>
+        </select><br>
+        <button onclick="createGame()" style="background:blue;color:white;border:none;padding:9px;margin:8px;">Create Game</button>
+        <p id="message" style="color:purple;"></p>
+    </div>
+
+<script>
+async function createGame() {
+    const response = await fetch("/api/games/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            title: document.getElementById("title").value,
+            description: document.getElementById("description").value,
+            genre: document.getElementById("genre").value,
+            visibility: document.getElementById("visibility").value
+        })
+    });
+    const data = await response.json();
+    if (data.success) window.location.href = "/edit-game.html?gameId=" + data.gameId;
+    else document.getElementById("message").innerText = data.message;
+}
+</script>
+
+</body>
+</html>

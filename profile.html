@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Playsculpt Profile</title>
+</head>
+<body style="font-family:Arial;background:white;text-align:center;color:#333;">
+
+    <h1 style="color:blue;">Playsculpt Profile</h1>
+    <div><a href="/home.html" style="color:blue;">Home</a> <a href="/games.html" style="color:purple;">Games</a> <a href="/groups.html" style="color:purple;">Groups</a></div>
+
+    <div id="profileBox" style="border:2px solid blue;background:#f5f5f5;max-width:700px;margin:15px auto;padding:15px;">Loading...</div>
+
+<script>
+function avatarHtml(color) {
+    return `<div style="width:70px;height:95px;margin:10px auto;position:relative;">
+        <div style="width:36px;height:36px;background:${color};border:2px solid #333;border-radius:18px;margin:auto;"></div>
+        <div style="width:48px;height:45px;background:${color};border:2px solid #333;margin:auto;"></div>
+        <div style="display:flex;gap:8px;justify-content:center;"><div style="width:15px;height:25px;background:${color};border:2px solid #333;"></div><div style="width:15px;height:25px;background:${color};border:2px solid #333;"></div></div>
+    </div>`;
+}
+
+function profileIdFromUrl(me) {
+    if (window.location.pathname.startsWith("/user/")) return window.location.pathname.split("/").pop();
+    return me.userId;
+}
+
+async function saveBio() {
+    const response = await fetch("/profile/bio", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bio: document.getElementById("bioInput").value })
+    });
+    const data = await response.json();
+    alert(data.success ? "Bio saved." : data.message);
+    loadProfile();
+}
+
+async function loadProfile() {
+    let me = { success: false };
+    try { me = await (await fetch("/me")).json(); } catch (err) {}
+    const id = profileIdFromUrl(me);
+    const response = await fetch("/api/profile/" + id);
+    const data = await response.json();
+    if (!data.success) { document.getElementById("profileBox").innerHTML = data.message; return; }
+
+    const profile = data.profile;
+    let gamesHtml = "<p>No visible games.</p>";
+    if (data.createdGames.length > 0) {
+        gamesHtml = "";
+        data.createdGames.forEach(game => {
+            gamesHtml += `<div style="border:1px solid blue;background:white;margin:5px;padding:8px;">
+                <b>${game.title}</b> (${game.genre}) - ${game.visibility}<br>
+                <a href="/play.html?gameId=${game.gameId}" style="color:blue;">Play</a>
+                ${data.isOwner ? `<a href="/edit-game.html?gameId=${game.gameId}" style="color:purple;margin-left:10px;">Edit</a>` : ""}
+            </div>`;
+        });
+    }
+
+    let groupsHtml = "<p>No joined groups.</p>";
+    if (data.joinedGroups.length > 0) {
+        groupsHtml = "";
+        data.joinedGroups.forEach(group => {
+            groupsHtml += `<div style="border:1px solid purple;background:white;margin:5px;padding:8px;"><a href="/group.html?groupId=${group.groupId}" style="color:purple;">${group.name}</a></div>`;
+        });
+    }
+
+    document.getElementById("profileBox").innerHTML = `
+        ${avatarHtml(profile.avatar.color)}
+        <h2 style="color:purple;">${profile.username}</h2>
+        <p style="color:gray;">User ID #${profile.userId}</p>
+        <p style="color:gray;">Joined ${new Date(profile.joinDate).toLocaleDateString()}</p>
+        <p>🪙 ${profile.currencies.SculptCoins} SculptCoins | ⭐ ${profile.currencies.Points} Points | 💎 ${profile.currencies.Diamonds} Diamonds</p>
+        <h3 style="color:blue;">Bio</h3>
+        <p>${profile.bio || "No bio yet."}</p>
+        ${data.isOwner ? `<textarea id="bioInput" maxlength="300" style="width:90%;height:70px;">${profile.bio || ""}</textarea><br><button onclick="saveBio()" style="background:blue;color:white;border:none;padding:8px;">Save Bio</button>` : ""}
+        <h3 style="color:blue;">Badges</h3>
+        <p>${profile.badges.length ? profile.badges.join(" 🏅 ") : "No badges yet."}</p>
+        <h3 style="color:blue;">Created Games</h3>${gamesHtml}
+        <h3 style="color:blue;">Joined Groups</h3>${groupsHtml}
+    `;
+}
+
+loadProfile();
+</script>
+
+</body>
+</html>
