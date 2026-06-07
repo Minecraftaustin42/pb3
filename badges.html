@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Playsculpt Badges</title>
+</head>
+<body style="background:white;font-family:Arial;text-align:center;">
+
+    <h1 style="color:blue;">Playsculpt Badges</h1>
+
+    <div style="border:2px solid purple;padding:15px;max-width:500px;margin:auto;background:#f5f5f5;">
+
+        <h2 id="badgeTitle" style="color:purple;">
+            Loading...
+        </h2>
+
+        <button onclick="showOwned()" style="background:blue;color:white;border:none;padding:8px;">
+            Owned
+        </button>
+
+        <button onclick="showLocked()" style="background:purple;color:white;border:none;padding:8px;">
+            Locked
+        </button>
+
+        <hr>
+
+        <div id="badgeList">
+            Loading badges...
+        </div>
+
+    </div>
+
+    <br>
+
+    <a href="/home.html" style="color:blue;">
+        Back Home
+    </a>
+
+<script>
+const allBadges = [
+    "Welcome to Playsculpt",
+    "First 1000 SculptCoins",
+    "First 2000 Points",
+    "First 10 Diamonds"
+];
+
+let ownedBadges = [];
+
+function showOwned() {
+    let html = "";
+
+    if (ownedBadges.length === 0) {
+        html = "<p>No badges earned yet.</p>";
+    } else {
+        ownedBadges.forEach(badge => {
+            html += `
+                <div style="border:1px solid blue;background:white;padding:8px;margin:5px;">
+                    🏅 ${badge}
+                </div>
+            `;
+        });
+    }
+
+    document.getElementById("badgeList").innerHTML = html;
+}
+
+function showLocked() {
+    const lockedBadges = allBadges.filter(
+        badge => !ownedBadges.includes(badge)
+    );
+
+    let html = "";
+
+    if (lockedBadges.length === 0) {
+        html = "<p>All badges unlocked!</p>";
+    } else {
+        lockedBadges.forEach(badge => {
+            html += `
+                <div style="border:1px solid gray;background:white;color:gray;padding:8px;margin:5px;">
+                    🔒 ${badge}
+                </div>
+            `;
+        });
+    }
+
+    document.getElementById("badgeList").innerHTML = html;
+}
+
+async function loadBadges() {
+    try {
+        const response = await fetch("/me");
+        const data = await response.json();
+
+        if (!data.success) {
+            window.location.href = "/auth.html";
+            return;
+        }
+
+        ownedBadges = data.badges || [];
+
+        document.getElementById("badgeTitle").innerText =
+            data.username + "'s Badges";
+
+        showOwned();
+
+    } catch (err) {
+        document.getElementById("badgeList").innerHTML =
+            "<p>Failed to load badges.</p>";
+    }
+}
+
+loadBadges();
+</script>
+
+</body>
+</html>

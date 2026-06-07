@@ -1,0 +1,55 @@
+[
+  {
+    "username": "d",
+    "userId": 1,
+    "passwordHash": "$2b$10$ZWIPASOAwqBUEkeYE.Ve4OANQJmJ3hvu0i42eOQ6n5CgRTg7OEoLS",
+    "currencies": {
+      "SculptCoins": 0,
+      "Points": 100,
+      "Diamonds": 0
+    },
+    "badges": [
+      "Welcome to Playsculpt"
+    ]
+  },
+  {
+    "username": "0",
+    "userId": 2,
+    "passwordHash": "$2b$10$w7yl.buA7OGNNLOwratltuTmn/njI7K4fVjVOUftGjprIy/M70uP2",
+    "currencies": {
+      "SculptCoins": 0,
+      "Points": 100,
+      "Diamonds": 0
+    },
+    "badges": [
+      "Welcome to Playsculpt"
+    ]
+  },
+  {
+    "username": "da",
+    "userId": 3,
+    "passwordHash": "$2b$10$S8xG6AZ9GS8q.yVegRZ01e3JGxkLzqbQAvlsX20HSC5JelKCrsHC6",
+    "currencies": {
+      "SculptCoins": 0,
+      "Points": 100,
+      "Diamonds": 0
+    },
+    "badges": [
+      "Welcome to Playsculpt"
+    ]
+  },
+  {
+    "username": "daf",
+    "userId": 4,
+    "joinDate": "2026-06-07T14:59:11.199Z",
+    "passwordHash": "$2b$10$UWoxqz2vHYXVSn1gynBkEuOYMEoL9xdlf3kC7vyCyQdus08eR6Vde",
+    "currencies": {
+      "SculptCoins": 0,
+      "Points": 100,
+      "Diamonds": 0
+    },
+    "badges": [
+      "Welcome to Playsculpt"
+    ]
+  }
+]

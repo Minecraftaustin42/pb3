@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Playsculpt</title>
+</head>
+<body style="font-family:Arial;background:white;text-align:center;">
+
+    <h1 style="color:blue;">Playsculpt</h1>
+
+    <p style="color:purple;">
+        Create an account for free to get started!
+    </p>
+
+    <form id="signupForm" style="
+        border:3px dashed blue;
+        padding:20px;
+        background:#f5f5f5;
+        max-width:300px;
+        margin:auto;
+    ">
+        <h3 style="color:blue;">Sign Up</h3>
+
+        <input type="text" id="signupUsername" placeholder="Username" required>
+
+        <br><br>
+
+        <input type="password" id="signupPassword" placeholder="Password" required>
+
+        <br><br>
+
+        <button type="submit">
+            Sign Up
+        </button>
+    </form>
+
+    <br>
+
+    <form id="loginForm" style="
+        border:3px dashed purple;
+        padding:20px;
+        background:#f5f5f5;
+        max-width:300px;
+        margin:auto;
+    ">
+        <h3 style="color:purple;">Login</h3>
+
+        <input type="text" id="usernameBox" placeholder="Username" required>
+
+        <br><br>
+
+        <input type="password" id="passwordBox" placeholder="Password" required>
+
+        <br><br>
+
+        <button type="submit">
+            Login
+        </button>
+    </form>
+
+<script>
+document.getElementById("signupForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const username = document.getElementById("signupUsername").value;
+    const password = document.getElementById("signupPassword").value;
+
+    try {
+        const response = await fetch("/signup", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username,
+                password
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert("Account created!");
+
+            document.getElementById("signupUsername").value = "";
+            document.getElementById("signupPassword").value = "";
+        } else {
+            alert(data.message || "Signup failed");
+        }
+
+    } catch (err) {
+        alert("Server error");
+    }
+});
+
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const username = document.getElementById("usernameBox").value;
+    const password = document.getElementById("passwordBox").value;
+
+    try {
+        const response = await fetch("/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username,
+                password
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            window.location.href = "/home.html";
+        } else {
+            alert(data.message || "Invalid login");
+        }
+
+    } catch (err) {
+        alert("Server error");
+    }
+});
+</script>
+
+</body>
+</html>

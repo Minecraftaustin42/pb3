@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Playsculpt</title>
+</head>
+<body style="font-family:Arial;background:white;text-align:center;">
+
+    <h1 style="color:blue;">Playsculpt</h1>
+
+    <div id="homeBox" style="
+        border:3px dashed purple;
+        padding:20px;
+        background:#f5f5f5;
+        max-width:400px;
+        margin:auto;
+    ">
+        Loading...
+    </div>
+
+    <br>
+
+    <a href="/badges.html" style="color:purple;">
+        View My Badges
+    </a>
+
+   
+
+    <br><br>
+
+    <button onclick="logout()" style="
+        background:blue;
+        color:white;
+        border:none;
+        padding:10px;
+    ">
+        Logout
+    </button>
+
+<script>
+const tipMessages = [
+    "You can earn Points by playing games!",
+    "You can earn SculptCoins by creating games!",
+    "You can view your badges and achievements in your profile!",
+    "Diamonds are rare! Use them for top-tier avatar items, perks, and more!",
+    "Invite friends to earn tons of points!",
+    "Check out the latest games in the Games section!",
+    "Customize your avatar with items from the Avatar Shop!",
+    "Points can be exchanged to SculptCoins with the Exchange feature!",
+    "You can create your own games with the Playsculpt Studio!",
+    "You can earn real-life rewards with SculptCoins!",
+    "Don't forget to check out community events!"
+];
+
+
+
+async function loadHome() {
+    try {
+        const response = await fetch("/me");
+        const data = await response.json();
+
+        if (!data.success) {
+            window.location.href = "/auth.html";
+            return;
+        }
+
+        const joinDate = new Date(data.joinDate);
+
+const formattedDate =
+    joinDate.toLocaleDateString();
+
+        const randomTip =
+            tipMessages[Math.floor(Math.random() * tipMessages.length)];
+
+        document.getElementById("homeBox").innerHTML = `
+            <h2 style="color:purple;">
+                Hello, ${data.username}
+            </h2>
+
+            <p style="color:gray;">
+                User ID #${data.userId}
+            </p>
+
+            <p style="color:gray;">
+    Member Since: ${formattedDate}
+</p>
+
+            <p>
+                ${randomTip}
+            </p>
+
+            <hr>
+
+            <p>
+                🪙 SculptCoins: <b>${data.currencies.SculptCoins}</b>
+            </p>
+
+            <p>
+                ⭐ Points: <b>${data.currencies.Points}</b>
+            </p>
+
+            <p>
+                💎 Diamonds: <b>${data.currencies.Diamonds}</b>
+            </p>
+        `;
+    } catch (err) {
+        document.getElementById("homeBox").innerHTML =
+            "Failed to load account.";
+    }
+}
+
+async function logout() {
+    await fetch("/logout", {
+        method: "POST"
+    });
+
+    window.location.href = "/auth.html";
+}
+
+loadHome();
+</script>
+
+</body>
+</html>
