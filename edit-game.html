@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Playsculpt Game</title>
+</head>
+<body style="font-family:Arial;background:white;text-align:center;color:#333;">
+
+    <h1 style="color:blue;">Game Editor</h1>
+    <div><a href="/home.html" style="color:blue;">Home</a> <a id="playLink" href="#" style="color:purple;">Play</a></div>
+
+    <!-- Game details editor -->
+    <div style="border:2px solid purple;background:#f5f5f5;max-width:700px;margin:15px auto;padding:15px;">
+        <input id="title" maxlength="60" placeholder="Title" style="padding:8px;margin:5px;width:90%;"><br>
+        <textarea id="description" maxlength="300" placeholder="Description" style="padding:8px;margin:5px;width:90%;height:60px;"></textarea><br>
+        <input id="genre" maxlength="30" placeholder="Genre" style="padding:8px;margin:5px;width:90%;"><br>
+        <select id="visibility" style="padding:8px;margin:5px;width:93%;"><option value="public">Public</option><option value="private">Private</option></select><br>
+        <button onclick="saveDetails()" style="background:blue;color:white;border:none;padding:8px;">Save Details</button>
+        <p id="message" style="color:purple;"></p>
+    </div>
+
+    <!-- Object editor -->
+    <div style="border:2px solid blue;background:#f5f5f5;max-width:700px;margin:15px auto;padding:15px;">
+        <h2 style="color:purple;">Objects</h2>
+        <p style="color:gray;">Objects use x and y positions in the 3D CSS world.</p>
+        <div id="objectsList"></div>
+        <button onclick="addObject()" style="background:purple;color:white;border:none;padding:8px;margin:8px;">Add Object</button>
+        <button onclick="saveObjects()" style="background:blue;color:white;border:none;padding:8px;margin:8px;">Save Objects</button>
+    </div>
+
+    <!-- Simple editor preview -->
+    <div id="preview" style="height:320px;margin:20px auto;max-width:700px;background:#dbeafe;border:2px solid gray;overflow:hidden;perspective:700px;position:relative;">
+        <div id="previewWorld" style="position:absolute;left:50%;top:60%;width:800px;height:800px;background:#e5e7eb;transform:translate(-50%,-50%) rotateX(65deg);transform-style:preserve-3d;border:2px solid #999;"></div>
+    </div>
+
+<script>
+const gameId = new URLSearchParams(window.location.search).get("gameId");
+let objects = [];
+document.getElementById("playLink").href = "/play.html?gameId=" + gameId;
+
+function objectRow(object, index) {
+    return `<div style="border:1px solid gray;background:white;padding:8px;margin:6px;">
+        <input value="${object.name}" onchange="objects[${index}].name=this.value" placeholder="Name" style="width:120px;">
+        <select onchange="objects[${index}].type=this.value">
+            <option ${object.type === "cube" ? "selected" : ""} value="cube">cube</option>
+            <option ${object.type === "sign" ? "selected" : ""} value="sign">sign</option>
+            <option ${object.type === "platform" ? "selected" : ""} value="platform">platform</option>
+            <option ${object.type === "coin" ? "selected" : ""} value="coin">coin</option>
+        </select>
+        x <input type="number" value="${object.x}" onchange="objects[${index}].x=Number(this.value);drawPreview();" style="width:70px;">
+        y <input type="number" value="${object.y}" onchange="objects[${index}].y=Number(this.value);drawPreview();" style="width:70px;">
+        <input type="color" value="${object.color}" onchange="objects[${index}].color=this.value;drawPreview();">
+        <button onclick="removeObject(${index})" style="background:gray;color:white;border:none;padding:5px;">Remove</button>
+    </div>`;
+}
+
+function renderObjects() {
+    document.getElementById("objectsList").innerHTML = objects.map(objectRow).join("");
+    drawPreview();
+}
+
+function addObject() {
+    objects.push({ name: "New Object", type: "cube", x: 0, y: 0, color: "#6b5cff" });
+    renderObjects();
+}
+
+function removeObject(index) {
+    objects.splice(index, 1);
+    renderObjects();
+}
+
+function drawPreview() {
+    let html = "";
+    objects.forEach(object => {
+        let size = object.type === "platform" ? "90px" : "45px";
+        let height = object.type === "sign" ? "70px" : "45px";
+        if (object.type === "coin") { size = "30px"; height = "30px"; }
+        html += `<div title="${object.name}" style="position:absolute;left:${400 + Number(object.x)}px;top:${400 + Number(object.y)}px;width:${size};height:${height};background:${object.color};border:2px solid #333;transform:translateZ(${object.type === "platform" ? "5px" : "30px"});"></div>`;
+    });
+    document.getElementById("previewWorld").innerHTML = html;
+}
+
+async function loadGame() {
+    const response = await fetch("/api/games/" + gameId);
+    const data = await response.json();
+    if (!data.success) { document.body.innerHTML = data.message; return; }
+    if (!data.game.isCreator) { document.body.innerHTML = "Only the creator can edit this game."; return; }
+    document.getElementById("title").value = data.game.title;
+    document.getElementById("description").value = data.game.description;
+    document.getElementById("genre").value = data.game.genre;
+    document.getElementById("visibility").value = data.game.visibility;
+    objects = data.game.objects || [];
+    renderObjects();
+}
+
+async function saveDetails() {
+    const response = await fetch("/api/games/" + gameId + "/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: title.value, description: description.value, genre: genre.value, visibility: visibility.value })
+    });
+    const data = await response.json();
+    document.getElementById("message").innerText = data.success ? "Details saved." : data.message;
+}
+
+async function saveObjects() {
+    const response = await fetch("/api/games/" + gameId + "/objects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ objects })
+    });
+    const data = await response.json();
+    document.getElementById("message").innerText = data.success ? "Objects saved." : data.message;
+}
+
+loadGame();
+</script>
+
+</body>
+</html>

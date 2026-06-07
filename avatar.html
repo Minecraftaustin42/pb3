@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Playsculpt Avatar</title>
+</head>
+<body style="font-family:Arial;background:white;text-align:center;color:#333;">
+
+    <h1 style="color:blue;">Customize Avatar</h1>
+    <a href="/home.html" style="color:blue;">Back Home</a>
+
+    <div style="border:2px solid purple;background:#f5f5f5;max-width:450px;margin:15px auto;padding:15px;">
+        <div id="avatarPreview"></div>
+        <p style="color:gray;">Choose a simple avatar color.</p>
+        <input id="avatarColor" type="color" value="#6b5cff" style="width:100px;height:45px;">
+        <br><button onclick="saveAvatar()" style="background:blue;color:white;border:none;padding:9px;margin:10px;">Save Avatar</button>
+        <p id="message" style="color:purple;"></p>
+    </div>
+
+<script>
+function avatarHtml(color) {
+    return `<div style="width:100px;height:130px;margin:10px auto;position:relative;">
+        <div style="width:48px;height:48px;background:${color};border:3px solid #333;border-radius:24px;margin:auto;"></div>
+        <div style="width:64px;height:55px;background:${color};border:3px solid #333;margin:auto;"></div>
+        <div style="display:flex;gap:12px;justify-content:center;"><div style="width:20px;height:32px;background:${color};border:3px solid #333;"></div><div style="width:20px;height:32px;background:${color};border:3px solid #333;"></div></div>
+    </div>`;
+}
+
+function updatePreview() {
+    document.getElementById("avatarPreview").innerHTML = avatarHtml(document.getElementById("avatarColor").value);
+}
+
+document.getElementById("avatarColor").addEventListener("input", updatePreview);
+
+async function loadAvatar() {
+    const response = await fetch("/me");
+    const data = await response.json();
+    if (!data.success) { window.location.href = "/auth.html"; return; }
+    document.getElementById("avatarColor").value = data.avatar.color || "#6b5cff";
+    updatePreview();
+}
+
+async function saveAvatar() {
+    const response = await fetch("/avatar/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ color: document.getElementById("avatarColor").value })
+    });
+    const data = await response.json();
+    document.getElementById("message").innerText = data.success ? "Avatar saved!" : data.message;
+}
+
+loadAvatar();
+</script>
+
+</body>
+</html>
